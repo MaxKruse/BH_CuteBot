@@ -1,0 +1,13 @@
+{
+  "name": "CuteBot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "tmi.js": "^1.8.1",
+    "winston": "^3.3.3"
+  }
+}

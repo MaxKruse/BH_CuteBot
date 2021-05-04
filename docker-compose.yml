@@ -1,0 +1,69 @@
+version: "3.8"
+
+services: 
+  app:
+    build: ./client
+    restart: unless-stopped
+    env_file: 
+      - ./client/.env
+      - mysql.env
+
+    volumes: 
+      - ./logs:/var/log/CuteBotStack
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    env_file: 
+      - ./api/.env
+      - mysql.env
+
+    volumes: 
+      - ./logs:/var/log/CuteBotStack
+
+    ports: 
+      - 5000:5000
+
+    depends_on: 
+      - db
+  
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+
+    ports:
+      - 80:80
+    
+    depends_on: 
+      - api
+
+  db:
+    image: mariadb:10.5
+    restart: unless-stopped
+    env_file: 
+     - mysql.env
+
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./logs:/var/log/CuteBotStack
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: unless-stopped  
+    ports:
+      - 6060:80
+
+    environment: 
+      - PMA_HOST=db
+
+  migration:
+    image: mathewhall/mysql_migration
+
+    volumes:
+      - ./migrations:/docker-entrypoint-migrations.d
+      
+    env_file: 
+      - mysql.env
+
+    depends_on: 
+      - db
