@@ -22,9 +22,8 @@ Key 3: R#g)*^<GI_E&bZ<Oe_4&sv)aFepPJBPC5O]z8y(2ZU)jHskjpRZ%XxPs-ZYNX7(j
 
 Before running this project, make sure to generate your own certificate files or use existing ones, e.g. from LetsEncrypt.
 
-To generate certificates, run 
-
-> openssl req -x509 -newkey rsa:4096 -keyout api/crypto/key.pem -out api/crypto/cert.pem -days 365
+To generate certificates, follow this example to generate certificate + key for your localhost:
+https://developer.salesforce.com/blogs/developer-relations/2011/05/generating-valid-self-signed-certificates.html
 
 Use `docker-compose up` to start the project. A local folder called `logs` will be created to record all logs.
 
