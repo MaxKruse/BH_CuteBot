@@ -113,8 +113,24 @@ app.patch("/api/v1/channel/:id/pretzelrocks", async (req, resp) => {
 })
 
 app.get("/api/v1/features", async (req, resp) => {
-    let features = db.query("SELECT * FROM features");
+    let features = await db.query("SELECT * FROM features");
 
+    resp.json(features);
+})
+
+app.post("/api/v1/features", async (req, resp) => {
+    const { name, description } = req.body;
+
+    if (!(name || description)) {
+        logger.error({ text: `Tried to create feature, but name or description wasnt found` })
+        resp.json({
+            error: `Missing name or description`
+        })
+    }
+
+    await db.query("INSERT INTO features (name, description) VALUES (?, ?)", [name, description]);
+
+    let features = await db.query("SELECT * FROM features WHERE name = ? AND description = ?", [name, description]);
     resp.json(features);
 })
 

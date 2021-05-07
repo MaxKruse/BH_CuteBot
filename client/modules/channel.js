@@ -4,12 +4,22 @@ const Response = require("./Response");
 const PretzelRocks = require("./features/PretzelRocks");
 const Mention = require("./features/Mention");
 
+const { createCutebotRequest, request } = require("./requests");
+
 class Channel {
 
     constructor(client, name) {
         this.client = client;
         this.name = name;
+        // remove # and lowercase it
+        this.cleanName = this.name.replace("#", "").toLowerCase();
         this.features = [];
+
+        this.id = -1;
+    }
+
+    getId() {
+        return this.id;
     }
 
     setFeatures(feats) {
@@ -29,10 +39,6 @@ class Channel {
             r = PretzelRocks.Command(tags, m) || r;
         }
 
-        if (this.features.includes("mention")) {
-            r = Mention.Listener(tags, m) || r;
-        }
-
         this.send(r.message);
 
         return r;
@@ -42,6 +48,14 @@ class Channel {
         if (message !== "")
             this.client.say(this.name, message);
     }
+}
+
+async function getAPI(url) {
+    return new Promise((resolve, reject) => {
+        request(createCutebotRequest(url), (data) => {
+            resolve(data);
+        })
+    })
 }
 
 module.exports = Channel;

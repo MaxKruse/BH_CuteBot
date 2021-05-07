@@ -30,8 +30,8 @@ class DbConnection {
         })
     }
 
-    query(sql: string, args: Array<any> = []) {
-        return new Promise((resolve, reject) => {
+    query<T>(sql: string, args: Array<any> = []) {
+        return new Promise<T>((resolve, reject) => {
             this.connection.query(sql, args, (err, resp, fields) => {
                 if (err) reject(err);
                 resolve(resp);

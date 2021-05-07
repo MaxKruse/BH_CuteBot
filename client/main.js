@@ -4,10 +4,10 @@ const EnumResponses = require("./modules/Enum");
 const loggerClass = require("./modules/logger");
 const axios = require("axios");
 
-const logger = new loggerClass("BH_CuteBot");
 const https = require("https");
-const BASE_URL = "https://api:5000/api/v1";
 
+const BASE_URL = "https://api:5000/api/v1";
+const logger = new loggerClass("BH_CuteBot");
 const USERNAME = process.env.BOT_USERNAME || "usrname";
 const PASSWORD = process.env.BOT_PASSWORD || "passwd";
 const CHANNELS_STRING = process.env.CHANNELS || "a,b,c";
@@ -41,9 +41,10 @@ logger.debug({ text: `Connecting to ${channelList}` })
 let channelArray = []
 
 // For each channel, create a logger
-channelList.forEach(channelName => {
+channelList.forEach(async (channelName) => {
   logger.addLogger(channelName);
-  channelArray.push(new Channel(client, channelName))
+  let c = new Channel(client, channelName);
+  channelArray.push(c)
 })
 
 client.on("connected", (addr, port) => {
@@ -67,8 +68,10 @@ client.on("message", (channelName, tags, message, self) => {
 
 async function refreshChannelConfigs() {
 
+  logger.info({ text: "Trying to get channels info" })
   // get all channels in the database
   let channels = await getAPI("/channels")
+  logger.info({ text: `Got: ${JSON.stringify(channels)}` })
 
   // for every channel
   channelArray.forEach(async (channel) => {
@@ -90,7 +93,10 @@ async function refreshChannelConfigs() {
     // ["pretzelrocks"]
     let arr = dbChannelInfo.features.map((feat) => feat.name);
     channel.setFeatures(arr);
-    logger.info({ text: `Config Updated for ${channelName}: ${channel.features.join(", ")}` });
+    // set channel id
+    channel.id = dbChannel.id;
+
+    logger.info({ text: `Config Updated for ${channel.cleanName}: ID=${channel.id} - FEATURES=${channel.features.join(", ")}` });
   });
 
   // Every 5 Minutes, refresh all channel configs
