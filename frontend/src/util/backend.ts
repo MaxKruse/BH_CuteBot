@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig } from "axios";
-import https from "https";
 
 const BASE_URL: string = "https://localhost:5000/api/v1";
 

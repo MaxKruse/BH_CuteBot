@@ -31,12 +31,14 @@ app.get("/api/v1/channel/:id", async (req, resp) => {
 
     const channel_id = req.params.id;
 
-    let channelName = await db.query("SELECT name FROM channels WHERE id = ?", [channel_id]);
+    let ch = await db.query("SELECT name, description FROM channels WHERE id = ?", [channel_id]);
     let features = await db.query("SELECT features.name AS name, features.description AS description FROM features, channel_features WHERE features.id = feature_id AND channel_id = ?", [Number(channel_id)]);
-    channelName = channelName[0]["name"];
+    let channelName = ch[0]["name"];
+    let description = ch[0]["description"];
 
     let res = {
         name: channelName,
+        description: description,
         features: features
     };
 
@@ -52,7 +54,7 @@ app.get("/api/v1/channel/:id/pretzelrocks", async (req, resp) => {
 
     let res = {
         name: channelName,
-        data: data
+        data: data[0]
     };
 
     resp.json(res);
@@ -73,8 +75,8 @@ app.post("/api/v1/channel/:id/pretzelrocks", async (req, resp) => {
     let channelName = await db.query("SELECT name FROM channels WHERE id = ?", [channel_id]);
     channelName = channelName[0]["name"];
 
-    await db.query(`INSERT INTO pretzelrocks_data (last_song, last_link, last_used, channel_id) VALUES (
-        ?, ?, ?, ?
+    await db.query(`INSERT INTO pretzelrocks_data (last_song, last_link, last_used, channel_id, last_added) VALUES (
+        ?, ?, ?, ?, UNIX_TIMESTAMP()
     )`, [last_song, last_link, last_used, channel_id]);
     let data = await db.query("SELECT * FROM pretzelrocks_data WHERE channel_id = ?", [Number(channel_id)]);
 
@@ -101,7 +103,18 @@ app.patch("/api/v1/channel/:id/pretzelrocks", async (req, resp) => {
     let channelName = await db.query("SELECT name FROM channels WHERE id = ?", [channel_id]);
     channelName = channelName[0]["name"];
 
-    await db.query("UPDATE pretzelrocks_data SET last_song = ?, last_link = ?, last_used = ? WHERE channel_id = ?", [last_song, last_link, last_used, channel_id]);
+    if (last_song) {
+        await db.query("UPDATE pretzelrocks_data SET last_song = ? WHERE channel_id = ?", [last_song, channel_id]);
+    }
+    if (last_link) {
+        await db.query("UPDATE pretzelrocks_data SET last_link = ? WHERE channel_id = ?", [last_link, channel_id]);
+    }
+    if (last_used) {
+        await db.query("UPDATE pretzelrocks_data SET last_used = ? WHERE channel_id = ?", [last_used, channel_id]);
+    }
+
+    await db.query("UPDATE pretzelrocks_data SET last_added = UNIX_TIMESTAMP() WHERE channel_id = ?", [channel_id]);
+
     let data = await db.query("SELECT * FROM pretzelrocks_data WHERE channel_id = ?", [Number(channel_id)]);
 
     let res = {
@@ -160,7 +173,8 @@ app.post("/api/v1/channel/assign_feature", async (req, resp) => {
 
 https.createServer({
     key: fs.readFileSync("crypto/server.key"),
-    cert: fs.readFileSync("crypto/server.cert")
+    cert: fs.readFileSync("crypto/server.crt"),
+    passphrase: process.env.PASSPHRASE
 }, app)
     .listen(
         process.env.API_PORT, async () => {

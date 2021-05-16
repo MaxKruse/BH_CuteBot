@@ -5,7 +5,8 @@ CREATE TABLE `CuteBot`.`pretzelrocks_data` (
     UNIQUE(channel_id), 
     `last_used` DECIMAL NOT NULL, 
     `last_song` VARCHAR(255) NOT NULL, 
-    `last_link` VARCHAR(255) NOT NULL) 
+    `last_link` VARCHAR(255) NOT NULL
+    ) 
     ENGINE = InnoDB;
 
 ALTER TABLE `CuteBot`.`pretzelrocks_data`

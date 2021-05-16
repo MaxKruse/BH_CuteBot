@@ -1,10 +1,11 @@
 const EnumResponses = require("./Enum");
 const Response = require("./Response");
+const axios = require("axios");
+
+const https = require("https");
+
 
 const PretzelRocks = require("./features/PretzelRocks");
-const Mention = require("./features/Mention");
-
-const { createCutebotRequest, request } = require("./requests");
 
 class Channel {
 
@@ -16,36 +17,45 @@ class Channel {
         this.features = [];
 
         this.id = -1;
+
+        this.getID();
     }
 
-    getId() {
-        return this.id;
+    async getID() {
+        let a = await getAPI("/channels");
+
+        let found = a.filter(ch => ch.name == this.cleanName);
+
+        if (found) {
+            this.id = found["id"];
+        }
     }
 
     setFeatures(feats) {
         this.features = feats;
     }
 
-    checkMessage(tags, message) {
+    async checkMessage(tags, message) {
         // Syntax highlighting in vscode
         let m = String(message);
+        console.log(this.id);
 
         // Response for each message
         let r = new Response(EnumResponses.NoCommand, "", ["No Command"]);
 
         if (this.features.includes("pretzelrocks")) {
-            r = PretzelRocks.Listener(tags, m) || r;
+            r = await PretzelRocks.Listener(tags, m, this.id) || r;
 
-            r = PretzelRocks.Command(tags, m) || r;
+            r = await PretzelRocks.Command(tags, m, this.id) || r;
         }
 
-        this.send(r.message);
+        await this.send(r.message);
 
         return r;
     }
 
-    send(message) {
-        if (message !== "")
+    async send(message) {
+        if (message && message !== "")
             this.client.say(this.name, message);
     }
 }
@@ -56,6 +66,28 @@ async function getAPI(url) {
             resolve(data);
         })
     })
+}
+
+const BASE_URL = "https://api:5000/api/v1";
+
+async function request(req, callback) {
+    axios(req)
+        .then(resp => {
+            callback(resp.data, resp)
+        })
+        .catch(err => {
+            console.log(JSON.stringify(err));
+        })
+}
+
+
+function createCutebotRequest(path, params = {}) {
+    return {
+        url: BASE_URL + path,
+        params: params,
+        maxContentLength: 15000,
+        httpsAgent: new https.Agent({ rejectUnauthorized: false })
+    }
 }
 
 module.exports = Channel;

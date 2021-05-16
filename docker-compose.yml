@@ -31,9 +31,9 @@ services:
     build: ./frontend
     restart: unless-stopped
 
-    ports:
-      - 80:80
-    
+    ports: 
+      - 443:5000
+
     depends_on: 
       - api
 
