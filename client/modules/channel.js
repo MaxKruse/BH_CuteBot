@@ -38,7 +38,6 @@ class Channel {
     async checkMessage(tags, message) {
         // Syntax highlighting in vscode
         let m = String(message);
-        console.log(this.id);
 
         // Response for each message
         let r = new Response(EnumResponses.NoCommand, "", ["No Command"]);
