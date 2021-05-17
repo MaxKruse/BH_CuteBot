@@ -93,13 +93,6 @@ app.patch("/api/v1/channel/:id/pretzelrocks", async (req, resp) => {
     const { last_song, last_link, last_used } = req.body;
     const channel_id = req.params.id;
 
-    if (!(last_used || last_song || last_link)) {
-        logger.error({ text: `last_song = ${last_song}, last_link = ${last_link}, last_used = ${last_used}` });
-        resp.json({
-            error: "No values were provided."
-        })
-    }
-
     let channelName = await db.query("SELECT name FROM channels WHERE id = ?", [channel_id]);
     channelName = channelName[0]["name"];
 

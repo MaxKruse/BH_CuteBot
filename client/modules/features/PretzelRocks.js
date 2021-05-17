@@ -39,6 +39,14 @@ async function PretzelRocksCommand(tags, m, id) {
             sendStr = sendStr.replace("$USER", tags["display-name"])
         }
 
+        let req = createCutebotRequest(`/channel/${id}/pretzelrocks`);
+        req.method = "PATCH";
+        req.data = {
+            last_used: Date.now() / 1000
+        };
+
+        await patchAPI(req);
+
         return new Response(EnumResponses.PretzelrocksCommand,
             sendStr,
             [
