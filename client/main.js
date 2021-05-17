@@ -78,21 +78,6 @@ async function refreshChannelConfigs() {
   let channels = await getAPI("/channels")
   logger.debug({ text: `Got: ${JSON.stringify(channels)}` })
 
-  // Check if we need to reconnect/change which channels we are connecting to
-  let channelsAsClient = channels.map(i => i.name);
-  let channelsFromClient = client.getChannels();
-
-  // reconnect all channels
-  logger.debug({ text: "Leaving all..." })
-  for (let a in channelsFromClient) {
-    await client.part(a).catch(e => console.log(e));
-  }
-
-  logger.debug({ text: "Joining all..." })
-  for (let a in channelsAsClient) {
-    await client.join(a).catch(e => console.log(e));
-  }
-
   // for every channel
   channelArray.forEach(async (channel) => {
     let channelName = String(channel.name).replace("#", "").toLowerCase();
